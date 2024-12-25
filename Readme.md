@@ -69,4 +69,3 @@ requirements.txt
 
 - OpenCV for providing the tools for image processing and facial recognition.
 - Streamlit for creating an easy-to-use web interface.
-- Contributors and the open-source community for their support and resources.
