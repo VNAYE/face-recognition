@@ -45,5 +45,34 @@ def recognize_faces_live(mark_attendance):
     cam.release()
     cv2.destroyAllWindows()
 
+def recognize_face_from_image(mark_attendance, image_path):
+    """
+    Recognize a face from a single image file and mark attendance if recognized.
+    """
+    recognizer = load_model()
+    detector = cv2.CascadeClassifier("haarcascade_frontalface_default.xml")
+    names = {}
+    with open('TrainingImageLabel/names.pkl', 'rb') as f:
+        names = pickle.load(f)
+    img = cv2.imread(image_path)
+    if img is None:
+        st.error("Could not read the uploaded image.")
+        return
+    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    faces = detector.detectMultiScale(gray, 1.3, 5)
+    found = False
+    for (x, y, w, h) in faces:
+        Id, confidence = recognizer.predict(gray[y:y+h, x:x+w])
+        if confidence < 50:
+            name = names.get(Id, "Unknown")
+            roll_number = Id
+            mark_attendance(name, roll_number)
+            st.success(f"Attendance marked for {name} ({roll_number})")
+            found = True
+        else:
+            st.warning("Face not recognized. Please register first.")
+    if not found:
+        st.warning("No recognizable face found in the image.")
+
 if __name__ == "__main__":
     recognize_faces_live(lambda name, roll_number: print(f"Marked attendance for {name} ({roll_number})"))
